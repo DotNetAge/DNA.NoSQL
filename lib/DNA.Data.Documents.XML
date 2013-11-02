@@ -1,0 +1,369 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>DNA.Data.Documents</name>
+    </assembly>
+    <members>
+        <member name="T:DNA.Data.Documents.BlobDataFileHeader">
+            <summary>
+            Represent the blob data file header class.
+            </summary>
+        </member>
+        <member name="M:DNA.Data.Documents.BlobDataFileHeader.Parse(System.Byte[])">
+            <summary>
+            Parse the 64 Byte array into Data Header object.
+            </summary>
+            <param name="bytes">The 64 Byte array.</param>
+        </member>
+        <member name="T:DNA.Data.Documents.BlobIndex">
+            <summary>
+            Represent an index class.
+            </summary>
+        </member>
+        <member name="M:DNA.Data.Documents.BlobIndex.#ctor(System.Int64,System.Int64,System.Int32,System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="!:MonoDS.Storage.DataIndex"/> class.
+            </summary>
+            <param name="documentKey">The Document key being stored in the data file.</param>
+            <param name="pointer">The Pointer to the document key located in the data file.</param>
+            <param name="recordLength">The total Record length of the data located in the data file.</param>
+            <param name="paddingFactorPercent">The Padding factor percentage (Amount of extra padding space for data increases).</param>
+        </member>
+        <member name="M:DNA.Data.Documents.BlobIndex.MarkAsDeleted">
+            <summary>
+            Marks the index to the document record as deleted by zeroing out the document key.
+            This prevents searches from finding the index to the document data.
+            </summary>
+        </member>
+        <member name="M:DNA.Data.Documents.BlobIndex.UpdateRecordLength(System.Int32)">
+            <summary>
+            Updates the record length and re-calculates the padding length.
+            </summary>
+        </member>
+        <member name="M:DNA.Data.Documents.BlobIndex.ChangeDocumentKey(System.Int64)">
+            <summary>
+            Changes the document key.
+            </summary>
+            <param name="documentKey">Document key.</param>
+        </member>
+        <member name="M:DNA.Data.Documents.BlobIndex.UpdateRecordPointer(System.Int64,System.Int32)">
+            <summary>
+            Updates the record pointer and generates a new Padding Length.
+            Note: This should be called when a document has been relocated to the end of the document datafile.
+            </summary>
+            <param name="newPointer">New pointer.</param>
+            <param name="paddingFactor">Padding factor.</param>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:DNA.Data.Documents.BlobIndex.Parse(System.Byte[])" -->
+        <member name="P:DNA.Data.Documents.BlobIndex.DocumentKey">
+            <summary>
+            Gets or sets the Document Key of the document stored in the datafile.
+            </summary>
+        </member>
+        <member name="P:DNA.Data.Documents.BlobIndex.Pointer">
+            <summary>
+            Gets or sets the Pointer (Position) of the document in the datafile.
+            </summary>
+        </member>
+        <member name="P:DNA.Data.Documents.BlobIndex.RecordLength">
+            <summary>
+            Gets or sets the length of the Document in (Bytes) stored in the datafile
+            </summary>
+        </member>
+        <member name="P:DNA.Data.Documents.BlobIndex.PaddingLength">
+            <summary>
+            Gets or sets the length of the padding bytes located after the document which allows room for the document to grow
+            without having to relocate the document in the datafile.
+            </summary>
+        </member>
+        <member name="P:DNA.Data.Documents.BlobIndex.Position">
+            <summary>
+            The position of the data index in the data index file.
+            Note: This property is not stored in the Data Index file.
+            Its used as a temporary helper property by find operations for locating.
+            </summary>
+        </member>
+        <member name="P:DNA.Data.Documents.BlobIndex.RequiresRelocation">
+            <summary>
+            On an update value is set to True if the document needs relocated in the data file.
+            </summary>
+        </member>
+        <member name="T:DNA.Data.Documents.BlobIndexFile">
+            <summary>
+            Represent an index file class.
+            </summary>
+        </member>
+        <member name="M:DNA.Data.Documents.BlobIndexFile.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the BlobIndexFile class.
+            </summary>
+            <param name="indexPath">The path to the data index file.</param>
+        </member>
+        <member name="M:DNA.Data.Documents.BlobIndexFile.#ctor(System.String,DNA.Data.Documents.DiskBufferSizes,DNA.Data.Documents.DiskBufferSizes)">
+            <summary>
+            Initializes a new instance of the BlobIndexFile class.
+            </summary>
+            <param name="indexPath">The path to the data index file.</param>
+            <param name="diskReadBufferSize">Disk read buffer size.</param>
+            <param name="diskWriteBufferSize">Disk write buffer size.</param>
+        </member>
+        <member name="M:DNA.Data.Documents.BlobIndexFile.AddIndexCheckForDuplicate(DNA.Data.Documents.BlobIndex)">
+            <summary>
+            Adds the Data Index to the Data Index file and checks for duplicate.
+            Note: The Data Index is the pointer to the record in the entites data file.
+            </summary>
+            <param name="searchKey">The Search Key (Primary Key) of the entity being stored in the data file.</param>
+            <param name="pointer">The Pointer (data position) to where the entity is being stored in the data File.</param>
+            <param name="length">The Length (number of bytes) of the data being stored in the data file.</param>
+            <exception cref="!:ConcurrencyException">When a data index record is found having the same Search Key</exception>
+        </member>
+        <member name="M:DNA.Data.Documents.BlobIndexFile.AddIndex(DNA.Data.Documents.BlobIndex)">
+            <summary>
+            Adds the Data Index to the Data Index file.
+            WARNING: This function does not check for duplicates and can cause problems with duplicate Data Index's.
+            Only use AddIndex if you have some other method of making sure the Data Index's being stored are unique.
+            e.g Using an Auto incrementing Search Key (Primary Key). Using AddIndexCheckForDuplicate is slower but makes sure there is no duplicates.
+            Note: The Data Index is the pointer to the record in the entites data file.
+            </summary>
+        </member>
+        <member name="M:DNA.Data.Documents.BlobIndexFile.AddIndexOverwriteDeleted(DNA.Data.Documents.BlobIndex)">
+            <summary>
+            Adds an index to the Data Index file.
+            Overwrites the first data index found with a 0 for its document key.
+            </summary>
+        </member>
+        <member name="M:DNA.Data.Documents.BlobIndexFile.UpdateIndex(DNA.Data.Documents.BlobIndex)">
+            <summary>
+            Updates the data index located in the data index file.
+            </summary>
+            <param name="dataIndex">The changed data index to update.</param>
+        </member>
+        <member name="M:DNA.Data.Documents.BlobIndexFile.RemoveIndex(System.Int64)">
+            <summary>
+            Removes the Data Index from the Data Index file.
+            Note: Index is Zeroed out.
+            </summary>
+            <param name="searchKey">Document Key.</param>
+        </member>
+        <member name="M:DNA.Data.Documents.BlobIndexFile.FindIndex(System.Int64)">
+            <summary>
+            Finds the Data Index in the file with the given Search Key (Primary Key).
+            </summary>
+            <returns>The Data Index containing the data record info.</returns>
+            <param name="searchKey">The Document Key (Primary Key) of the entity to find.</param>
+        </member>
+        <member name="M:DNA.Data.Documents.BlobIndexFile.DoesIndexExist(System.Int64)">
+            <summary>
+            Search the Data Index file for an existing Data Index with the provided Search Key (Primary Key).
+            </summary>
+            <returns><c>true</c>, If the Data Index exists, <c>false</c> if the Data Index does not exist.</returns>
+            <param name="searchKey">The Search Key (Primary Key) of the entity to check is already stored.</param>
+        </member>
+        <member name="M:DNA.Data.Documents.BlobIndexFile.GetBlobIndex(System.Int64)">
+            <summary>
+            Gets the data index for record.
+            Returns null when at the end of the data index file.
+            </summary>
+            <returns>The index for record.</returns>
+            <param name="recdordNumber">Record number.</param>
+        </member>
+        <member name="M:DNA.Data.Documents.BlobIndexFile.GetBlobIndexWithEnoughSpace(System.Int64)">
+            <summary>
+            Gets the first available data index with space greater than the size specified in bytes.
+            The index returned is the size greater than the length with the combined record length and padding bytes.
+            </summary>
+            <returns>The data index with space greater than length specified.</returns>
+            <param name="dataLength">Data length in bytes.</param>
+        </member>
+        <member name="M:DNA.Data.Documents.BlobIndexFile.Dispose">
+            <summary>
+            Releases all resource used by the BlobIndexFile object.
+            </summary>
+        </member>
+        <member name="T:DNA.Data.Documents.BlobRepository`1">
+            <summary>
+            Represent a blob repository base on a sample KV database
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:DNA.Data.Documents.BlobRepository`1.Initialize">
+            <summary>
+            Initialise this instance. 
+            </summary>
+        </member>
+        <member name="M:DNA.Data.Documents.BlobRepository`1.DestroyExistingData">
+            <summary>
+            Destroys all document data and indexes for the entity belonging to the current instance.
+            </summary>
+        </member>
+        <member name="P:DNA.Data.Documents.BlobRepository`1.FileSize">
+            <summary>
+            Gets the size of the document data file in Bytes.
+            </summary>
+            <value>The size of the file in Bytes.</value>
+        </member>
+        <member name="P:DNA.Data.Documents.BlobRepository`1.PaddingFactor">
+            <summary>
+            Gets or sets the padding factor for each document stored.
+            This is how much extra space is assigned to each document for allowing the document to expand.
+            </summary>
+            <value>The padding factor percentage.</value>
+        </member>
+        <member name="T:DNA.Data.Documents.BSonSerializer">
+            <summary>
+            Reprsent an entity serializer for bson data format.
+            </summary>
+        </member>
+        <member name="M:DNA.Data.Documents.BSonSerializer.Serialize``1(``0)">
+            <summary>
+            Convert the entity (document) to byte array.
+            </summary>
+            <param name="entity">Entity.</param>
+        </member>
+        <member name="M:DNA.Data.Documents.BSonSerializer.Deserialize``1(System.Byte[])">
+            <summary>
+            Converts the byte array into an entity (document).
+            </summary>
+            <param name="bytes">BSON Bytes.</param>
+        </member>
+        <member name="T:DNA.Data.Documents.DiskBufferSizes">
+            <summary>
+            Enum disk buffer sizes.
+            </summary>
+        </member>
+        <member name="F:DNA.Data.Documents.DiskBufferSizes.Default">
+            <summary>
+            The default 8 Bytes.
+            </summary>
+        </member>
+        <member name="F:DNA.Data.Documents.DiskBufferSizes.Small">
+            <summary>
+            Small 8 KB (8192 Bytes).
+            </summary>
+        </member>
+        <member name="F:DNA.Data.Documents.DiskBufferSizes.Medium">
+            <summary>
+            Medium 16 KB (16384 Bytes).
+            </summary>
+        </member>
+        <member name="F:DNA.Data.Documents.DiskBufferSizes.Large">
+            <summary>
+            Large 32 KB (32768 Bytes).
+            </summary>
+        </member>
+        <member name="F:DNA.Data.Documents.DiskBufferSizes.Larger">
+            <summary>
+            Larger 64 KB (65536 Bytes).
+            </summary>
+        </member>
+        <member name="F:DNA.Data.Documents.DiskBufferSizes.Maximum">
+            <summary>
+            Largest 128 KB (131072 Bytes).
+            </summary>
+        </member>
+        <member name="T:DNA.Data.Documents.DocumentStorage">
+            <summary>
+            Represents a simple document storage use to save objects.
+            </summary>
+        </member>
+        <member name="M:DNA.Data.Documents.DocumentStorage.#ctor(System.String)">
+            <summary>
+             Initializes a new instance of DocumentStorage class.
+            </summary>
+            <param name="basePath">Specified the storage path to save data files.</param>
+        </member>
+        <member name="M:DNA.Data.Documents.DocumentStorage.#ctor(System.String,System.String)">
+            <summary>
+             Initializes a new instance of DocumentStorage class.
+            </summary>
+            <param name="basePath">Specified the storage path to save data files.</param>
+            <param name="docType">Specified the document storage type.</param>
+        </member>
+        <member name="M:DNA.Data.Documents.DocumentStorage.Find``1(System.Object)">
+            <summary>
+            Get object instance by specified id.
+            </summary>
+            <typeparam name="T">Specified the object type.</typeparam>
+            <param name="id">Specified the object id.</param>
+            <returns>if success returns the object otherwrise return null.</returns>
+        </member>
+        <member name="M:DNA.Data.Documents.DocumentStorage.Add``1(``0)">
+            <summary>
+            Add an object to database
+            </summary>
+            <typeparam name="T">Specified the object type.</typeparam>
+            <param name="t"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DNA.Data.Documents.DocumentStorage.Add``1(System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Add objects to database.
+            </summary>
+            <typeparam name="T">Specified the object type.</typeparam>
+            <param name="items">The objects collection.</param>
+            <returns></returns>
+        </member>
+        <member name="P:DNA.Data.Documents.DocumentStorage.BaseDataPath">
+            <summary>
+            Gets / Sets the base data doucments path
+            </summary>
+        </member>
+        <member name="P:DNA.Data.Documents.DocumentStorage.TableName">
+            <summary>
+            Gets/Sets the base data table name.
+            </summary>
+        </member>
+        <member name="P:DNA.Data.Documents.DocumentStorageConfiguation.DocumentType">
+            <summary>
+            Gets/Sets the document file format the possible value is one of xml | json |blob
+            </summary>
+        </member>
+        <member name="P:DNA.Data.Documents.DocumentStorageConfiguation.BaseDataPath">
+            <summary>
+            Gets / Sets the base data doucments path
+            </summary>
+        </member>
+        <member name="P:DNA.Data.Documents.FileBasedRepository`1.DataFile">
+            <summary>
+            Gets/Sets the data file name.
+            </summary>
+        </member>
+        <member name="P:DNA.Data.Documents.FileBasedRepository`1.TableName">
+            <summary>
+            Gets/Sets the table name
+            </summary>
+        </member>
+        <member name="P:DNA.Data.Documents.FileBasedRepository`1.Extension">
+            <summary>
+            Gets the data file extension. without "."
+            </summary>
+        </member>
+        <member name="M:DNA.Data.Documents.QueueFile`1.Clear">
+            <summary>
+            Reset the queue and empty the data file.
+            </summary>
+        </member>
+        <member name="M:DNA.Data.Documents.QueueFile`1.Dequeue">
+            <summary>
+            Dequeue the object.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:DNA.Data.Documents.QueueStorage.Clear``1">
+            <summary>
+            Clear and reset the queue file.
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="T:DNA.Data.Documents.SqlCERepository`1">
+            <summary>
+            Represent a no sql repository base on SQLCe
+            </summary>
+        </member>
+        <member name="P:DNA.Data.Documents.XmlRepository`1.Extension">
+            <summary>
+            Gets the data file extension. without "."
+            </summary>
+        </member>
+    </members>
+</doc>
